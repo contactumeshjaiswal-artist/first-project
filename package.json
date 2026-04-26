@@ -1,0 +1,12 @@
+{
+  "name": "lesson06",
+  "version": "1.0.0",
+  "description": "Complete Complex backend",
+  "license": "ISC",
+  "author": "Umesh",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
