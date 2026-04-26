@@ -7,6 +7,14 @@ dotenv.config({
 })
 
 connectDB()
+.then(()=>{
+    app.listen(process.env.PORT || 8000, ()=>{
+        console.log(`Server is Running @ PORT NO -----> ${process.env.PORT}`);        
+    })
+})
+.catch((err)=>{
+    console.log("Customized Error ## Index.js ## -----> ", err);    
+})
 
 /*
 
