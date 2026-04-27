@@ -32,7 +32,7 @@ const registerUser = asyncHandler(async (req, res)=>{
     }
     
     // Checking the Existing Entry to Avoid Duplicacy
-    const existingUser = User.findOne({
+    const existingUser = await User.findOne({
         $or: [{username}, {email}]
     })
 
@@ -40,7 +40,12 @@ const registerUser = asyncHandler(async (req, res)=>{
 
     // Handling Files
     const avatarLocalPath = req.files?.avatar[0]?.path
-    const coverImgLocalPath = req.files?.coverImage[0]?.path
+    // const coverImgLocalPath = req.files?.coverImage[0]?.path
+
+    let coverImgLocalPath
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0){
+        coverImgLocalPath = req.files.coverImage[0].path
+    }
 
     if(!avatarLocalPath){throw new apiError(400, "Avatar file is Required")}
 
