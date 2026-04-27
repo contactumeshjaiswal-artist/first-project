@@ -158,7 +158,7 @@ const userLogout = asyncHandler( async(req, res)=>{
     .json(new apiResponse(200, {}, "User Logged Out"))
 })
 
-const refreshAccessToken = asyncHandler( async (req, res)=>{
+const refreshAccessToken = asyncHandler( async(req, res)=>{
     const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken
 
     if(!incomingRefreshToken){
@@ -188,13 +188,12 @@ const refreshAccessToken = asyncHandler( async (req, res)=>{
         .status(200)
         .cookie("accessToken", accessToken, options)
         .cookie("refreshToken", NewRefreshToken, options)
-        .json({
-            new apiResponse(
-                200, 
+        .json(
+            new apiResponse(200, 
                 {accessToken, refreshToken: NewRefreshToken},
                 "AccessTokenRefreshed Successfully"
             )
-        })
+        )
     } catch (error) {
         throw new apiError(401, error?.message || "Invalid Refresh Token")
     }
