@@ -218,7 +218,7 @@ const changeCurrentPassword = asyncHandler(async (req, res)=>{
 const getCurrentUser = asyncHandler(async(req, res)=>{
     return res
     .status(200)
-    .json(200, req.user, "Current User Fetched Successfully")
+    .json(new apiResponse(200, req.user, "Current User Fetched Successfully"))
 })
 
 const updateUser = asyncHandler(async(req, res)=>{
@@ -227,7 +227,7 @@ const updateUser = asyncHandler(async(req, res)=>{
     if(!(fullName || email)){
         throw new apiError(400, "All fields are Required")
     }
-    const user = User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
@@ -281,6 +281,74 @@ const updateUserCover = asyncHandler(async(req,res)=>{
     .json(
         new apiResponse(200, user, "Cover Image Upadated Successfully")
     )
+})
+
+const getUserChannelProfile = asyncHandler(async(req, res)=>{
+    const {username} = req.params
+    if(!username?.trim()){
+        throw new apiError(400, "Username Missing")
+    }
+    const channel = await User.aggregate([
+        {
+            $match:{
+                username: username?.toLowerCase()
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localfield: "_id",
+                foreignField: "channel",
+                as: "subscribers"
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localfield: "_id",
+                foreignField: "subscriber",
+                as: "subscribedTo"
+            }
+        },
+        {
+            $addFields: {
+                subscribersCount: {
+                    $size: "$subscribers"
+                },
+                subscribedCount: {
+                    $size: "$subscribedTo"
+                },
+                isSubscribed:{
+                    $cond: {
+                        if:{$in: [req.user?._id, "$subscribers.subscriber"]},
+                        then: true,
+                        else: false
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                fullName: 1,
+                username: 1,
+                subscribersCount: 1,
+                subscribedCount: 1,
+                isSubscribed: 1,
+                avatar: 1,
+                coverImage: 1,
+                email: 1,
+            }
+        }
+    ])
+    //  console.log(channel);
+
+    if (!channel?.length) {
+        throw new apiError(400, "Channel Doesn't Exists")
+    }
+
+    return res
+    .status(200)
+    .json( new apiResponse(200, channel[0], "User Channel Fetched Successfully"))
 })
 
 export {registerUser, loginUser, userLogout, refreshAccessToken,changeCurrentPassword,getCurrentUser,updateUser,updateUserAvatar,updateUserCover}
