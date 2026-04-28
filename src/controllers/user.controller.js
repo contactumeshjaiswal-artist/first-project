@@ -146,7 +146,7 @@ const loginUser = asyncHandler(async (req, res)=>{
 
 const userLogout = asyncHandler( async(req, res)=>{
     await User.findByIdAndUpdate(
-        req.user._id,{$set: {refreshToken: undefined}},{ new: true}
+        req.user._id,{$unset: {refreshToken: 1}},{ new: true}
     )
     const options = {
         httpOnly: true,
@@ -160,7 +160,7 @@ const userLogout = asyncHandler( async(req, res)=>{
 })
 
 const refreshAccessToken = asyncHandler( async(req, res)=>{
-    const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken
+    const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken
 
     if(!incomingRefreshToken){
         throw new apiError(401, "Unauthorize Request")
@@ -298,7 +298,7 @@ const getUserChannelProfile = asyncHandler(async(req, res)=>{
         {
             $lookup: {
                 from: "subscriptions",
-                localfield: "_id",
+                localField: "_id",
                 foreignField: "channel",
                 as: "subscribers"
             }
@@ -306,7 +306,7 @@ const getUserChannelProfile = asyncHandler(async(req, res)=>{
         {
             $lookup: {
                 from: "subscriptions",
-                localfield: "_id",
+                localField: "_id",
                 foreignField: "subscriber",
                 as: "subscribedTo"
             }
